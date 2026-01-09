@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
+#include <sys/socket.h>
 
 void test_methods() {
     printf("Testing HTTP methods...\n");
@@ -44,10 +46,62 @@ void test_response_lifecycle() {
     printf("Passed Response Lifecycle.\n");
 }
 
+void test_parse_request() {
+    printf("Testing Request Parsing...\n");
+    const char *raw = "POST /api/users HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n\r\n{\"name\":\"test\"}";
+    
+    cwist_http_request *req = cwist_http_parse_request(raw);
+    assert(req != NULL);
+    assert(req->method == CWIST_HTTP_POST);
+    assert(strcmp(req->path->data, "/api/users") == 0);
+    assert(strcmp(req->version->data, "HTTP/1.1") == 0);
+    
+    assert(strcmp(cwist_http_header_get(req->headers, "Host"), "localhost") == 0);
+    assert(strcmp(cwist_http_header_get(req->headers, "Content-Type"), "application/json") == 0);
+    
+    assert(strcmp(req->body->data, "{\"name\":\"test\"}") == 0);
+    
+    cwist_http_request_destroy(req);
+    printf("Passed Request Parsing.\n");
+}
+
+void test_send_response() {
+    printf("Testing Response Sending...\n");
+    int sv[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
+        perror("socketpair");
+        return;
+    }
+
+    cwist_http_response *res = cwist_http_response_create();
+    res->status_code = CWIST_HTTP_OK;
+    smartstring_assign(res->status_text, "OK");
+    cwist_http_header_add(&res->headers, "Content-Type", "text/plain");
+    smartstring_assign(res->body, "Hello World");
+
+    cwist_http_send_response(sv[0], res);
+    
+    char buffer[1024];
+    ssize_t len = recv(sv[1], buffer, sizeof(buffer) - 1, 0);
+    buffer[len] = '\0';
+    
+    // Check key parts (order of headers might vary if implementation changes, but currently it's a stack)
+    assert(strstr(buffer, "HTTP/1.1 200 OK\r\n") != NULL);
+    assert(strstr(buffer, "Content-Type: text/plain\r\n") != NULL);
+    assert(strstr(buffer, "\r\nHello World") != NULL);
+
+    cwist_http_response_destroy(res);
+    close(sv[0]);
+    close(sv[1]);
+    printf("Passed Response Sending.\n");
+}
+
 int main() {
     test_methods();
     test_request_lifecycle();
     test_response_lifecycle();
+    test_parse_request();
+    test_send_response();
     printf("All HTTP tests passed!\n");
     return 0;
 }

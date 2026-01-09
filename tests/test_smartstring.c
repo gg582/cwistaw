@@ -61,10 +61,48 @@ void test_seek() {
     printf("Passed seek.\n");
 }
 
+void test_compare() {
+    printf("Testing compare...\n");
+    smartstring *s = smartstring_create();
+    smartstring_assign(s, "hello");
+    
+    assert(smartstring_compare(s, "hello") == 0);
+    assert(smartstring_compare(s, "world") != 0);
+    assert(smartstring_compare(s, "he") > 0);
+    assert(smartstring_compare(s, "hello world") < 0);
+    
+    smartstring_destroy(s);
+    printf("Passed compare.\n");
+}
+
+void test_substr() {
+    printf("Testing substr...\n");
+    smartstring *s = smartstring_create();
+    smartstring_assign(s, "0123456789");
+    
+    smartstring *sub = smartstring_substr(s, 2, 3); // "234"
+    assert(sub != NULL);
+    assert(strcmp(sub->data, "234") == 0);
+    smartstring_destroy(sub);
+    
+    sub = smartstring_substr(s, 8, 5); // "89" (capped)
+    assert(sub != NULL);
+    assert(strcmp(sub->data, "89") == 0);
+    smartstring_destroy(sub);
+    
+    sub = smartstring_substr(s, 10, 1); // Out of bounds
+    assert(sub == NULL);
+    
+    smartstring_destroy(s);
+    printf("Passed substr.\n");
+}
+
 int main() {
     test_trim();
     test_resize();
     test_seek();
+    test_compare();
+    test_substr();
     printf("All tests passed!\n");
     return 0;
 }

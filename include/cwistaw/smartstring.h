@@ -24,6 +24,8 @@ cwist_error_t smartstring_assign(smartstring *str, char *data);
 cwist_error_t smartstring_append(smartstring *str, const char *data); // New function
 cwist_error_t smartstring_seek(smartstring *str, char *substr, int location);
 cwist_error_t smartstring_copy(smartstring *origin, char *destination);
+int smartstring_compare(smartstring *str, const char *compare_to);
+smartstring *smartstring_substr(smartstring *str, int start, int length);
 
 enum smartstring_error_t {
   ERR_SMARTSTRING_OKAY,

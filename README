@@ -3,12 +3,18 @@ CWISTAW is a acronym of "C Web development Is STill Alive and Well".
 This aims for modern, and fast C web framework.
 
 == What is going on? ==
-- Smart String
+- Smart String (with compare & substr)
 - Error Codes
+- HTTP Request Parsing
+- HTTP Response Sending
+
 == What's next? ==
 - HTTP Handlers
   - Abstract socket handlers
   - Memory-safe easy multiprocessing
+- HTTP Client Support
+- SmartString formatted printing (sprintf)
+- Robust error handling in parser
 
 == Dependency ==
 - https://github.com/DaveGamble/cJSON

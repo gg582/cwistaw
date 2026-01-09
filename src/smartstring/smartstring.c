@@ -235,3 +235,40 @@ void smartstring_destroy(smartstring *str) {
         free(str);
     }
 }
+
+int smartstring_compare(smartstring *str, const char *compare_to) {
+    if (!str || !str->data) {
+        if (!compare_to) return 0; // Both NULL-ish (empty treated as NULL for comparison?)
+        return -1; 
+    }
+    if (!compare_to) return 1; 
+    
+    return strcmp(str->data, compare_to);
+}
+
+smartstring *smartstring_substr(smartstring *str, int start, int length) {
+    if (!str || !str->data || start < 0 || length < 0) return NULL;
+    
+    size_t current_len = strlen(str->data);
+    if ((size_t)start >= current_len) return NULL;
+    
+    // Adjust length if it goes beyond end
+    if ((size_t)(start + length) > current_len) {
+        length = current_len - start;
+    }
+    
+    smartstring *sub = smartstring_create();
+    if (!sub) return NULL;
+    
+    sub->data = (char *)malloc(length + 1);
+    if (!sub->data) {
+        smartstring_destroy(sub);
+        return NULL;
+    }
+    sub->size = length;
+    
+    memcpy(sub->data, str->data + start, length);
+    sub->data[length] = '\0';
+    
+    return sub;
+}

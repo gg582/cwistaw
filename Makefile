@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -I./include -I./lib -Wall -Wextra -lcjson
-LIBS = -lcjson
+CFLAGS = -I./include -I./lib -Wall -Wextra -lcjson -pthread
+LIBS = -lcjson -pthread
 
 SRCS = src/smartstring/smartstring.c src/process/err/error.c src/http/http.c
 OBJS = $(SRCS:.c=.o)
